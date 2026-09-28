@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pip-Boy Interface</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* Basic reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #050805;
+      color: #00ff66;
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .pipboy-frame {
+      border: 4px solid #00ff66;
+      border-radius: 12px;
+      padding: 16px;
+      width: 95vw;
+      max-width: 900px;
+      background: radial-gradient(circle at top left, #0b1f0b 0%, #020402 60%);
+      box-shadow: 0 0 25px #00ff66;
+    }
+
+    .pipboy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #00ff66;
+      padding-bottom: 6px;
+    }
+
+    .pipboy-title {
+      font-size: 1.2rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .pipboy-status {
+      font-size: 0.8rem;
+      text-align: right;
+    }
+
+    .pipboy-status span {
+      display: block;
+    }
+
+    .pipboy-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      border-bottom: 1px solid #00ff66;
+      padding-bottom: 8px;
+    }
+
+    .pipboy-tab {
+      padding: 6px 12px;
+      border: 1px solid #00ff66;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: #020402;
+    }
+
+    .pipboy-tab.active {
+      background: #0b1f0b;
+      box-shadow: 0 0 10px #00ff66;
+    }
+
+    .pipboy-content {
+      margin-top: 12px;
+      min-height: 320px;
+      position: relative;
+    }
+
+    .pipboy-panel {
+      display: none;
+      animation: flicker 0.25s linear;
+    }
+
+    .pipboy-panel.active {
+      display: block;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0; }
+      40% { opacity: 0.4; }
+      70% { opacity: 0.8; }
+      100% { opacity: 1; }
+    }
+
+    /* Quests panel */
+    .quest-list {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 8px;
+    }
+
+    .quest-item {
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px dotted #00ff66;
+    }
+
+    .quest-title {
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .quest-meta {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* Map panel */
+    .map-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    .map-wrapper img {
+      max-width: 100%;
+      max-height: 280px;
+      border: 2px solid #00ff66;
+      border-radius: 8px;
+      filter: contrast(1.2) brightness(0.9) sepia(0.4) hue-rotate(80deg);
+    }
+
+    /* Radio panel */
+    .radio-list {
+      list-style: none;
+      margin-top: 8px;
+    }
+
+    .radio-item {
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px dotted #00ff66;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .radio-name {
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .radio-meta {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* Footer / knobs */
+    .pipboy-footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .pipboy-knobs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .knob {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #00ff66;
+      position: relative;
+    }
+
+    .knob::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 8px;
+      background: #00ff66;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%) rotate(20deg);
+    }
+
+    .pipboy-footer-right {
+      text-align: right;
+    }
+
+    /* Scanline effect */
+    .scanlines {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.2) 1px,
+        transparent 1px
+      );
+      background-size: 100% 3px;
+      mix-blend-mode: multiply;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="pipboy-frame">
+    <div class="pipboy-header">
+      <div class="pipboy-title">FISTFUL OF CAPS</div>
+      <div class="pipboy-status">
+        <span>STATUS: ONLINE</span>
+        <span>VAULT-TEC TERMINAL v2.0</span>
+      </div>
+    </div>
+
+    <div class="pipboy-tabs">
+      <div class="pipboy-tab active" data-target="quests">Quests</div>
+      <div class="pipboy-tab" data-target="map">Map</div>
+      <div class="pipboy-tab" data-target="radio">Radio</div>
+    </div>
+
+    <div class="pipboy-content">
+      <!-- Quests Panel -->
+      <div id="quests" class="pipboy-panel active">
+        <div>OBJECTIVES:</div>
+        <ul class="quest-list">
+          <li class="quest-item">
+            <div class="quest-title">A Fistful of Caps</div>
+            <div class="quest-meta">
+              Location: Sacramento Wastes<br />
+              Status: In Progress
+            </div>
+          </li>
+          <li class="quest-item">
+            <div class="quest-title">Secure the Caravan Route</div>
+            <div class="quest-meta">
+              Location: Route 99<br />
+              Status: Unassigned
+            </div>
+          </li>
+          <li class="quest-item">
+            <div class="quest-title">Contact Local Fixer</div>
+            <div class="quest-meta">
+              Location: Old Town<br />
+              Status: Optional
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Map Panel -->
+      <div id="map" class="pipboy-panel">
+        <div>REGIONAL MAP:</div>
+        <div class="map-wrapper">
+          <!-- Replace map.png with your actual PNG path in the repo -->
+          <img src="map.png" alt="Wasteland Map" />
+        </div>
+      </div>
+
+      <!-- Radio Panel -->
+      <div id="radio" class="pipboy-panel">
+        <div>KNOWN RADIO STATIONS:</div>
+        <ul class="radio-list">
+          <li class="radio-item">
+            <span class="radio-name">Radio New Reno</span>
+            <span class="radio-meta">Frequency: 88.3 MHz<br />Status: Strong Signal</span>
+          </li>
+          <li class="radio-item">
+            <span class="radio-name">Vault-Tec Emergency Channel</span>
+            <span class="radio-meta">Frequency: 101.1 MHz<br />Status: Intermittent</span>
+          </li>
+          <li class="radio-item">
+            <span class="radio-name">Dust Devil Blues</span>
+            <span class="radio-meta">Frequency: 95.7 MHz<br />Status: Weak Signal</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="scanlines"></div>
+    </div>
+
+    <div class="pipboy-footer">
+      <div class="pipboy-knobs">
+        <div class="knob"></div>
+        <div class="knob"></div>
+        <div class="knob"></div>
+      </div>
+      <div class="pipboy-footer-right">
+        <div>PRESS TAB TO CYCLE</div>
+        <div>PROPERTY OF VAULT-TEC CORPORATION</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple tab switching
+    const tabs = document.querySelectorAll(".pipboy-tab");
+    const panels = document.querySelectorAll(".pipboy-panel");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const targetId = tab.getAttribute("data-target");
+
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        panels.forEach(panel => {
+          if (panel.id === targetId) {
+            panel.classList.add("active");
+          } else {
+            panel.classList.remove("active");
+          }
+        });
+      });
+    });
+
+    // Optional: keyboard cycling with Tab key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const currentIndex = Array.from(tabs).findIndex(t =>
+          t.classList.contains("active")
+        );
+        const nextIndex = (currentIndex + 1) % tabs.length;
+        tabs[nextIndex].click();
+      }
+    });
+  </script>
+</body>
+</html>
