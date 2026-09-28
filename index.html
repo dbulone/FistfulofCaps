@@ -140,6 +140,45 @@
       border: 2px solid #00ff66;
       border-radius: 8px;
       filter: contrast(1.2) brightness(0.9) sepia(0.4) hue-rotate(80deg);
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .map-wrapper img:hover {
+      box-shadow: 0 0 15px #00ff66;
+    }
+
+    /* Expanded map overlay */
+    .map-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 5vh 5vw;
+      background: rgba(5, 8, 5, 0.95);
+      cursor: pointer;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .map-overlay.active {
+      display: flex;
+    }
+
+    .map-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 3px solid #00ff66;
+      border-radius: 8px;
+      filter: contrast(1.2) brightness(0.9) sepia(0.4) hue-rotate(80deg);
+      box-shadow: 0 0 40px #00ff66;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     /* Radio panel */
@@ -284,8 +323,7 @@
       <div id="map" class="pipboy-panel">
         <div>REGIONAL MAP:</div>
         <div class="map-wrapper">
-          <!-- Replace map.png with your actual PNG path in the repo -->
-          <img src="FalloutMap9.27.png" alt="Wasteland Map" />
+          <img id="mapImage" src="FalloutMap9.27.png" alt="Wasteland Map" />
         </div>
       </div>
 
@@ -316,6 +354,11 @@
         <div>PROPERTY OF VAULT-TEC CORPORATION</div>
       </div>
     </div>
+  </div>
+
+  <!-- Clicking the expanded image or overlay closes it. -->
+  <div id="mapOverlay" class="map-overlay" role="dialog" aria-modal="true" aria-label="Expanded wasteland map">
+    <img src="FalloutMap9.27.png" alt="Expanded wasteland map" />
   </div>
 
   <script>
@@ -349,6 +392,24 @@
         );
         const nextIndex = (currentIndex + 1) % tabs.length;
         tabs[nextIndex].click();
+      }
+    });
+
+    // Click the map to enlarge it; click again or press Escape to close it.
+    const mapImage = document.getElementById("mapImage");
+    const mapOverlay = document.getElementById("mapOverlay");
+
+    mapImage.addEventListener("click", () => {
+      mapOverlay.classList.add("active");
+    });
+
+    mapOverlay.addEventListener("click", () => {
+      mapOverlay.classList.remove("active");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        mapOverlay.classList.remove("active");
       }
     });
   </script>
